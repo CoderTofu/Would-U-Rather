@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id              String               @id @default(uuid())
+  clerkId         String               @unique
+  username        String               @unique
+  avatarUrl       String?
+  createdAt       DateTime             @default(now())
+  votes           Vote[]
+  submissions     QuestionSubmission[]
+  suggestionVotes SuggestionVote[]
+}
+
+model Question {
+  id        String   @id @default(uuid())
+  content   String
+  postedAt  DateTime @default(now())
+  expiresAt DateTime
+  isActive  Boolean  @default(true)
+  slot      Slot
+
+  choices Choice[]
+  votes   Vote[]
+}
+
+enum Slot {
+  MORNING
+  EVENING
+}
+
+model Choice {
+  id         String  @id @default(uuid())
+  content    String
+  isCustom   Boolean @default(false)
+  questionId String
+
+  question Question @relation(fields: [questionId], references: [id])
+  votes    Vote[]
+}
+
+model Vote {
+  id         String   @id @default(uuid())
+  userId     String
+  questionId String
+  choiceId   String
+  createdAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id])
+  question Question @relation(fields: [questionId], references: [id])
+  choice   Choice   @relation(fields: [choiceId], references: [id])
+
+  @@unique([userId, questionId])
+}
+
+model QuestionSubmission {
+  id          String   @id @default(uuid())
+  content     String
+  submittedBy String
+  createdAt   DateTime @default(now())
+  status      Status   @default(PENDING)
+
+  user            User             @relation(fields: [submittedBy], references: [id])
+  suggestionVotes SuggestionVote[]
+}
+
+enum Status {
+  PENDING
+  APPROVED
+  REJECTED
+  USED
+}
+
+model SuggestionVote {
+  id           String   @id @default(uuid())
+  userId       String
+  submissionId String
+  createdAt    DateTime @default(now())
+
+  user       User               @relation(fields: [userId], references: [id])
+  submission QuestionSubmission @relation(fields: [submissionId], references: [id])
+
+  @@unique([userId, submissionId])
+}
