@@ -1,36 +1,114 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Would U Rather
 
-## Getting Started
+A full-stack Next.js application for running a daily "Would You Rather" experience with user authentication, question choices, and voting.
 
-First, run the development server:
+## Tech Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Next.js 16 (App Router)
+- React 19 + TypeScript
+- Prisma ORM + PostgreSQL
+- Clerk authentication
+- Svix webhook verification (for Clerk events)
+- Tailwind CSS 4
+
+## Prerequisites
+
+- Node.js 20+
+- Docker Desktop (or Docker Engine)
+- A Clerk account and application
+- ngrok (for local webhook testing)
+
+## Local Development Setup
+
+1. Install dependencies:
+
+	```bash
+	npm install
+	```
+
+2. Start PostgreSQL via Docker:
+
+	```bash
+	docker compose up -d
+	```
+
+3. Create your environment file (`.env` or `.env.local`) with the variables listed below.
+
+4. Apply Prisma migrations:
+
+	```bash
+	npx prisma migrate dev
+	```
+
+5. Start the Next.js dev server:
+
+	```bash
+	npm run dev
+	```
+
+6. In a separate terminal, expose your app to Clerk with ngrok:
+
+	```bash
+	ngrok http 3000
+	```
+
+## Environment Variables
+
+Use the following variables in your env file:
+
+```env
+# Database
+DATABASE_URL="postgresql://postgres:postgres@localhost:5433/wouldurather"
+
+# Clerk
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_publishable_key
+CLERK_SECRET_KEY=your_secret_key
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+
+# Clerk Webhooks (Svix)
+CLERK_WEBHOOK_SECRET=your_webhook_secret
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Clerk Webhook Configuration
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Open the Clerk Dashboard.
+2. Create a webhook endpoint pointing to:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+	```text
+	https://<your-ngrok-subdomain>.ngrok-free.app/api/webhooks/clerk
+	```
 
-## Learn More
+3. Subscribe to at least the `user.created` event.
+4. Copy the webhook signing secret and set `CLERK_WEBHOOK_SECRET` in your env file.
 
-To learn more about Next.js, take a look at the following resources:
+## Available Scripts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `npm run dev` - Start development server
+- `npm run build` - Build production app
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Database Notes
 
-## Deploy on Vercel
+The default local Docker database configuration from `docker-compose.yml` is:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- host: `localhost`
+- port: `5433`
+- user: `postgres`
+- password: `postgres`
+- database: `wouldurather`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Troubleshooting
+
+- If Clerk users are not appearing in your database:
+  - ensure ngrok is running
+  - verify webhook URL is current
+  - confirm `CLERK_WEBHOOK_SECRET` matches Clerk Dashboard
+- If Prisma fails to connect:
+  - verify Docker container is running with `docker compose ps`
+  - check `DATABASE_URL` points to port `5433`
+
+## Project Status
+
+This project is under active development.
