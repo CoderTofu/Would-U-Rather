@@ -85,6 +85,7 @@ CLERK_WEBHOOK_SECRET=your_webhook_secret
 ## Available Scripts
 
 - `npm run dev` - Start development server
+- `npx prisma studio` - Open Prisma Studio
 - `npm run build` - Build production app
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint

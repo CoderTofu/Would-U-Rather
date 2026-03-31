@@ -1,11 +1,22 @@
 import { prisma } from "@/lib/db";
+import { getChoices, getQuestions, getQuestionsToday } from "./api/getters";
+
+import Navbar from "./components/navbar";
+import QuestionBlock from "./components/question-block";
 
 export default async function Home() {
-  const users = await prisma.user.findMany();
-  console.log(users);
+  const questions = await getQuestions(); //getQuestionsToday();
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      Testing
+    <div className="">
+      <Navbar />
+      {/* Label */}
+      <section>
+        <h2>Daily Dilemmas</h2>
+        <p>Choose your path and see what the world thinks.</p>
+      </section>
+      {questions?.map((question) => (
+        <QuestionBlock key={question.id} question={question} />
+      ))}
     </div>
   );
 }
